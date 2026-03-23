@@ -1,0 +1,61 @@
+version: 3
+
+vars:
+  IMAGE: bitnami/kafka:latest
+  CONTAINER_NAME: kafka-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Kafka container
+    cmds:
+      - kubectl apply -f kafka.yaml
+    silent: true
+
+  status:
+    desc: Check the status of the Kafka container
+    cmds:
+      - kubectl get pods -l app=kafka
+    silent: true
+
+  wait:
+    desc: Wait for the Kafka container to be ready
+    cmds:
+      - kubectl wait --for=condition=Ready pod -l app=kafka --timeout=120s
+    silent: true
+
+  remove:
+    desc: Remove the Kafka container
+    cmds:
+      - kubectl delete -f kafka.yaml
+    silent: true
+
+  logs:
+    desc: View the logs of the Kafka container
+    cmds:
+      - kubectl logs -l app=kafka
+    silent: false
+
+  cli:
+    vars:
+      POD:
+        sh: |
+          kubectl get pods -l app=kafka -o jsonpath='{.items[0].metadata.name}'
+    desc: Open a shell in the Kafka container
+    cmds:
+      - kubectl exec -it {{.POD}} -- bash
+    silent: false
+
+  test:
+    desc: Run a test for Kafka (starts Zookeeper, then Kafka)
+    cmds:
+      - task: kube-zookeeper:create
+      - task: kube-zookeeper:wait
+      - task: create
+      - task: wait
+      - task: status
+      - task: logs
+      - task: remove
+      - task: kube-zookeeper:remove
+    silent: false

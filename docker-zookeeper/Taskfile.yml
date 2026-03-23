@@ -1,0 +1,54 @@
+version: 3
+
+vars:
+  IMAGE: bitnami/zookeeper:latest
+  CONTAINER_NAME: zookeeper-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Zookeeper container
+    cmds:
+      - docker run -d --name {{.CONTAINER_NAME}} -p 2181:2181 -e ALLOW_ANONYMOUS_LOGIN=yes {{.IMAGE}}
+    silent: true
+
+  stop:
+    desc: Stop the Zookeeper container
+    cmds:
+      - docker stop {{.CONTAINER_NAME}}
+    silent: true
+
+  remove:
+    desc: Remove the Zookeeper container
+    cmds:
+      - docker rm -f {{.CONTAINER_NAME}}
+    silent: true
+
+  logs:
+    desc: View the logs of the Zookeeper container
+    cmds:
+      - docker logs {{.CONTAINER_NAME}}
+    silent: false
+
+  cli:
+    desc: Open a shell in the Zookeeper container
+    cmds:
+      - docker exec -it {{.CONTAINER_NAME}} bash
+    silent: false
+
+  status:
+    desc: Check the status of the Zookeeper container
+    cmds:
+      - docker ps -a --filter "name={{.CONTAINER_NAME}}"
+    silent: true
+
+  test:
+    desc: Run a test command in the Zookeeper container
+    cmds:
+      - task: create
+      - task: status
+      - task: logs
+      - task: remove
+      - task: status
+    silent: false

@@ -1,0 +1,63 @@
+version: 3
+
+vars:
+  IMAGE: bitnami/kafka:latest
+  CONTAINER_NAME: kafka-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Kafka container
+    cmds:
+      - >
+        docker run -d --name {{.CONTAINER_NAME}} -p 9092:9092
+        -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-server:2181
+        -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+        -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+        -e ALLOW_PLAINTEXT_LISTENER=yes
+        --link zookeeper-server
+        {{.IMAGE}}
+    silent: true
+
+  stop:
+    desc: Stop the Kafka container
+    cmds:
+      - docker stop {{.CONTAINER_NAME}}
+    silent: true
+
+  remove:
+    desc: Remove the Kafka container
+    cmds:
+      - docker rm -f {{.CONTAINER_NAME}}
+    silent: true
+
+  logs:
+    desc: View the logs of the Kafka container
+    cmds:
+      - docker logs {{.CONTAINER_NAME}}
+    silent: false
+
+  cli:
+    desc: Open a shell in the Kafka container
+    cmds:
+      - docker exec -it {{.CONTAINER_NAME}} bash
+    silent: false
+
+  status:
+    desc: Check the status of the Kafka container
+    cmds:
+      - docker ps -a --filter "name={{.CONTAINER_NAME}}"
+    silent: true
+
+  test:
+    desc: Run a test for Kafka (starts Zookeeper, then Kafka)
+    cmds:
+      - task: docker-zookeeper:create
+      - task: create
+      - task: status
+      - task: logs
+      - task: remove
+      - task: docker-zookeeper:remove
+      - task: status
+    silent: false

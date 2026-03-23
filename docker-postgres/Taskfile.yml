@@ -1,0 +1,54 @@
+version: 3
+
+vars:
+  IMAGE: postgres:16
+  CONTAINER_NAME: postgres-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the PostgreSQL container
+    cmds:
+      - docker run -d --name {{.CONTAINER_NAME}} -p 5432:5432 -e POSTGRES_PASSWORD=password {{.IMAGE}}
+    silent: true
+
+  stop:
+    desc: Stop the PostgreSQL container
+    cmds:
+      - docker stop {{.CONTAINER_NAME}}
+    silent: true
+
+  remove:
+    desc: Remove the PostgreSQL container
+    cmds:
+      - docker rm -f {{.CONTAINER_NAME}}
+    silent: true
+
+  logs:
+    desc: View the logs of the PostgreSQL container
+    cmds:
+      - docker logs {{.CONTAINER_NAME}}
+    silent: false
+
+  cli:
+    desc: Open a psql shell in the PostgreSQL container
+    cmds:
+      - docker exec -it {{.CONTAINER_NAME}} psql -U postgres
+    silent: false
+
+  status:
+    desc: Check the status of the PostgreSQL container
+    cmds:
+      - docker ps -a --filter "name={{.CONTAINER_NAME}}"
+    silent: true
+
+  test:
+    desc: Run a test command in the PostgreSQL container
+    cmds:
+      - task: create
+      - task: status
+      - task: logs
+      - task: remove
+      - task: status
+    silent: false

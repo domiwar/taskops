@@ -1,0 +1,58 @@
+version: 3
+
+vars:
+  IMAGE: bitnami/zookeeper:latest
+  CONTAINER_NAME: zookeeper-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Zookeeper container
+    cmds:
+      - kubectl apply -f zookeeper.yaml
+    silent: true
+
+  status:
+    desc: Check the status of the Zookeeper container
+    cmds:
+      - kubectl get pods -l app=zookeeper
+    silent: true
+
+  wait:
+    desc: Wait for the Zookeeper container to be ready
+    cmds:
+      - kubectl wait --for=condition=Ready pod -l app=zookeeper --timeout=60s
+    silent: true
+
+  remove:
+    desc: Remove the Zookeeper container
+    cmds:
+      - kubectl delete -f zookeeper.yaml
+    silent: true
+
+  logs:
+    desc: View the logs of the Zookeeper container
+    cmds:
+      - kubectl logs -l app=zookeeper
+    silent: false
+
+  cli:
+    vars:
+      POD:
+        sh: |
+          kubectl get pods -l app=zookeeper -o jsonpath='{.items[0].metadata.name}'
+    desc: Open a shell in the Zookeeper container
+    cmds:
+      - kubectl exec -it {{.POD}} -- bash
+    silent: false
+
+  test:
+    desc: Run a test command in the Zookeeper container
+    cmds:
+      - task: create
+      - task: wait
+      - task: status
+      - task: logs
+      - task: remove
+    silent: false

@@ -1,0 +1,58 @@
+version: 3
+
+vars:
+  IMAGE: postgres:16
+  CONTAINER_NAME: postgres-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the PostgreSQL container
+    cmds:
+      - kubectl apply -f postgres.yaml
+    silent: true
+
+  status:
+    desc: Check the status of the PostgreSQL container
+    cmds:
+      - kubectl get pods -l app=postgres
+    silent: true
+
+  wait:
+    desc: Wait for the PostgreSQL container to be ready
+    cmds:
+      - kubectl wait --for=condition=Ready pod -l app=postgres --timeout=60s
+    silent: true
+
+  remove:
+    desc: Remove the PostgreSQL container
+    cmds:
+      - kubectl delete -f postgres.yaml
+    silent: true
+
+  logs:
+    desc: View the logs of the PostgreSQL container
+    cmds:
+      - kubectl logs -l app=postgres
+    silent: false
+
+  cli:
+    vars:
+      POD:
+        sh: |
+          kubectl get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}'
+    desc: Open a psql shell in the PostgreSQL container
+    cmds:
+      - kubectl exec -it {{.POD}} -- psql -U postgres
+    silent: false
+
+  test:
+    desc: Run a test command in the PostgreSQL container
+    cmds:
+      - task: create
+      - task: wait
+      - task: status
+      - task: logs
+      - task: remove
+    silent: false
