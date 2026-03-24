@@ -15,14 +15,14 @@ tasks:
   create:
     desc: Run the Kafka container
     cmds:
+      - docker network create taskops-net 2>/dev/null || true
       - docker rm -f {{.CONTAINER_NAME}} 2>/dev/null || true
       - >
-        docker run -d --name {{.CONTAINER_NAME}} -p 9092:9092
+        docker run -d --name {{.CONTAINER_NAME}} --network taskops-net -p 9092:9092
         -e KAFKA_ZOOKEEPER_CONNECT=zookeeper-server:2181
         -e KAFKA_LISTENERS=PLAINTEXT://:9092
         -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
         -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
-        --link zookeeper-server
         {{.IMAGE}}
     silent: true
 
@@ -60,6 +60,7 @@ tasks:
     desc: Run a test for Kafka (starts Zookeeper, then Kafka)
     cmds:
       - task: docker-zookeeper:create
+      - sleep 5
       - task: create
       - task: status
       - task: logs

@@ -10,8 +10,9 @@ tasks:
   create:
     desc: Run the Zookeeper container
     cmds:
+      - docker network create taskops-net 2>/dev/null || true
       - docker rm -f {{.CONTAINER_NAME}} 2>/dev/null || true
-      - docker run -d --name {{.CONTAINER_NAME}} -p 2181:2181 -e ZOO_4LW_COMMANDS_WHITELIST=* {{.IMAGE}}
+      - docker run -d --name {{.CONTAINER_NAME}} --network taskops-net -p 2181:2181 -e ZOO_4LW_COMMANDS_WHITELIST=* {{.IMAGE}}
     silent: true
 
   stop:
