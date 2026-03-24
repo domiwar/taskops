@@ -6,7 +6,7 @@ includes:
     dir: ../kube-zookeeper
 
 vars:
-  IMAGE: bitnami/kafka:latest
+  IMAGE: apache/kafka:latest
   CONTAINER_NAME: kafka-server
 
 tasks:

@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
         - name: zookeeper
-          image: bitnami/zookeeper:latest
+          image: zookeeper:latest
           ports:
             - containerPort: 2181
           env:
-            - name: ALLOW_ANONYMOUS_LOGIN
-              value: "yes"
+            - name: ZOO_4LW_COMMANDS_WHITELIST
+              value: "*"
           resources:
             requests:
               memory: "128Mi"

@@ -1,7 +1,7 @@
 version: 3
 
 vars:
-  IMAGE: bitnami/zookeeper:latest
+  IMAGE: zookeeper:latest
   CONTAINER_NAME: zookeeper-server
 
 tasks:

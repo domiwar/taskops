@@ -1,7 +1,7 @@
 version: 3
 
 vars:
-  IMAGE: bitnami/zookeeper:latest
+  IMAGE: zookeeper:latest
   CONTAINER_NAME: zookeeper-server
 
 tasks:
@@ -10,7 +10,7 @@ tasks:
   create:
     desc: Run the Zookeeper container
     cmds:
-      - docker run -d --name {{.CONTAINER_NAME}} -p 2181:2181 -e ALLOW_ANONYMOUS_LOGIN=yes {{.IMAGE}}
+      - docker run -d --name {{.CONTAINER_NAME}} -p 2181:2181 -e ZOO_4LW_COMMANDS_WHITELIST=* {{.IMAGE}}
     silent: true
 
   stop:
