@@ -1,5 +1,10 @@
 version: 3
 
+includes:
+  docker-zookeeper:
+    taskfile: ../docker-zookeeper/Taskfile.yml
+    dir: ../docker-zookeeper
+
 vars:
   IMAGE: bitnami/kafka:latest
   CONTAINER_NAME: kafka-server
