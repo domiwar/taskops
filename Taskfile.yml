@@ -31,3 +31,19 @@ includes:
 
 tasks:
   default: task --list-all
+
+  test-docker-kafka:
+    desc: Full integration test for Docker Kafka + Zookeeper
+    cmds:
+      - task: docker-zookeeper:create
+      - task: docker-zookeeper:wait
+      - task: docker-kafka:test
+      - task: docker-zookeeper:remove
+
+  test-kube-kafka:
+    desc: Full integration test for Kube Kafka + Zookeeper
+    cmds:
+      - task: kube-zookeeper:create
+      - task: kube-zookeeper:wait
+      - task: kube-kafka:test
+      - task: kube-zookeeper:remove
