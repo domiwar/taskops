@@ -15,6 +15,7 @@ tasks:
   create:
     desc: Run the Kafka container
     cmds:
+      - docker rm -f {{.CONTAINER_NAME}} 2>/dev/null || true
       - >
         docker run -d --name {{.CONTAINER_NAME}} -p 9092:9092
         -e KAFKA_ZOOKEEPER_CONNECT=zookeeper-server:2181
