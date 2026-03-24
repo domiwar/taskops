@@ -54,12 +54,12 @@ tasks:
   test:
     desc: Run a test for Kafka (starts Zookeeper, then Kafka)
     cmds:
-      - task docker-zookeeper:create
-      - task docker-zookeeper:wait
+      - task -d .. docker-zookeeper:create
+      - task -d .. docker-zookeeper:wait
       - task: create
       - task: status
       - task: logs
       - task: remove
-      - task docker-zookeeper:remove
+      - task -d .. docker-zookeeper:remove
       - task: status
     silent: false
