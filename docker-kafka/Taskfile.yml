@@ -1,10 +1,5 @@
 version: 3
 
-includes:
-  docker-zookeeper:
-    taskfile: ../docker-zookeeper/Taskfile.yml
-    dir: ../docker-zookeeper
-
 vars:
   IMAGE: apache/kafka:latest
   CONTAINER_NAME: kafka-server
@@ -59,12 +54,12 @@ tasks:
   test:
     desc: Run a test for Kafka (starts Zookeeper, then Kafka)
     cmds:
-      - task: docker-zookeeper:create
-      - sleep 5
+      - task docker-zookeeper:create
+      - task docker-zookeeper:wait
       - task: create
       - task: status
       - task: logs
       - task: remove
-      - task: docker-zookeeper:remove
+      - task docker-zookeeper:remove
       - task: status
     silent: false
