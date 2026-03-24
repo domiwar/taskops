@@ -48,14 +48,14 @@ tasks:
     silent: false
 
   test:
-    desc: Run a test for Kafka (starts Zookeeper, then Kafka)
+    desc: Run a test for Kafka (requires Zookeeper to be running)
+    preconditions:
+      - sh: kubectl get pods -l app=zookeeper -o jsonpath='{.items[0].status.phase}' 2>/dev/null | grep -q Running
+        msg: "Zookeeper is not running. Start it first with: task kube-zookeeper:create && task kube-zookeeper:wait"
     cmds:
-      - task -d .. kube-zookeeper:create
-      - task -d .. kube-zookeeper:wait
       - task: create
       - task: wait
       - task: status
       - task: logs
       - task: remove
-      - task -d .. kube-zookeeper:remove
     silent: false

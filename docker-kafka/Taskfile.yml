@@ -52,14 +52,14 @@ tasks:
     silent: true
 
   test:
-    desc: Run a test for Kafka (starts Zookeeper, then Kafka)
+    desc: Run a test for Kafka (requires Zookeeper to be running)
+    preconditions:
+      - sh: docker ps --filter "name=zookeeper-server" --filter "status=running" --format '{{`{{.Names}}`}}' | grep -q zookeeper-server
+        msg: "Zookeeper is not running. Start it first with: task docker-zookeeper:create && task docker-zookeeper:wait"
     cmds:
-      - task -d .. docker-zookeeper:create
-      - task -d .. docker-zookeeper:wait
       - task: create
       - task: status
       - task: logs
       - task: remove
-      - task -d .. docker-zookeeper:remove
       - task: status
     silent: false
