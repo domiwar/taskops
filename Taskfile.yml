@@ -4,12 +4,46 @@ includes:
   docker-redis:
     taskfile: ./docker-redis/Taskfile.yml
     dir: ./docker-redis
+  docker-postgres:
+    taskfile: ./docker-postgres/Taskfile.yml
+    dir: ./docker-postgres
+  docker-zookeeper:
+    taskfile: ./docker-zookeeper/Taskfile.yml
+    dir: ./docker-zookeeper
+  docker-kafka:
+    taskfile: ./docker-kafka/Taskfile.yml
+    dir: ./docker-kafka
   kube-kind:
     taskfile: ./kube-kind/Taskfile.yml
     dir: ./kube-kind
   kube-redis:
     taskfile: ./kube-redis/Taskfile.yml
     dir: ./kube-redis
+  kube-postgres:
+    taskfile: ./kube-postgres/Taskfile.yml
+    dir: ./kube-postgres
+  kube-zookeeper:
+    taskfile: ./kube-zookeeper/Taskfile.yml
+    dir: ./kube-zookeeper
+  kube-kafka:
+    taskfile: ./kube-kafka/Taskfile.yml
+    dir: ./kube-kafka
 
 tasks:
   default: task --list-all
+
+  test-docker-kafka:
+    desc: Full integration test for Docker Kafka + Zookeeper
+    cmds:
+      - task: docker-zookeeper:create
+      - task: docker-zookeeper:wait
+      - task: docker-kafka:test
+      - task: docker-zookeeper:remove
+
+  test-kube-kafka:
+    desc: Full integration test for Kube Kafka + Zookeeper
+    cmds:
+      - task: kube-zookeeper:create
+      - task: kube-zookeeper:wait
+      - task: kube-kafka:test
+      - task: kube-zookeeper:remove

@@ -1,0 +1,65 @@
+version: 3
+
+vars:
+  IMAGE: apache/kafka:latest
+  CONTAINER_NAME: kafka-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Kafka container
+    cmds:
+      - docker network create taskops-net 2>/dev/null || true
+      - docker rm -f {{.CONTAINER_NAME}} 2>/dev/null || true
+      - >
+        docker run -d --name {{.CONTAINER_NAME}} --network taskops-net -p 9092:9092
+        -e KAFKA_ZOOKEEPER_CONNECT=zookeeper-server:2181
+        -e KAFKA_LISTENERS=PLAINTEXT://:9092
+        -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+        -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+        {{.IMAGE}}
+    silent: true
+
+  stop:
+    desc: Stop the Kafka container
+    cmds:
+      - docker stop {{.CONTAINER_NAME}}
+    silent: true
+
+  remove:
+    desc: Remove the Kafka container
+    cmds:
+      - docker rm -f {{.CONTAINER_NAME}}
+    silent: true
+
+  logs:
+    desc: View the logs of the Kafka container
+    cmds:
+      - docker logs {{.CONTAINER_NAME}}
+    silent: false
+
+  cli:
+    desc: Open a shell in the Kafka container
+    cmds:
+      - docker exec -it {{.CONTAINER_NAME}} bash
+    silent: false
+
+  status:
+    desc: Check the status of the Kafka container
+    cmds:
+      - docker ps -a --filter "name={{.CONTAINER_NAME}}"
+    silent: true
+
+  test:
+    desc: Run a test for Kafka (requires Zookeeper to be running)
+    preconditions:
+      - sh: docker ps --filter "name=zookeeper-server" --filter "status=running" --format '{{`{{.Names}}`}}' | grep -q zookeeper-server
+        msg: "Zookeeper is not running. Start it first with: task docker-zookeeper:create && task docker-zookeeper:wait"
+    cmds:
+      - task: create
+      - task: status
+      - task: logs
+      - task: remove
+      - task: status
+    silent: false

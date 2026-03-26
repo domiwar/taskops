@@ -1,0 +1,73 @@
+version: 3
+
+vars:
+  IMAGE: zookeeper:latest
+  CONTAINER_NAME: zookeeper-server
+
+tasks:
+  default: task --list-all
+
+  create:
+    desc: Run the Zookeeper container
+    cmds:
+      - docker network create taskops-net 2>/dev/null || true
+      - docker rm -f {{.CONTAINER_NAME}} 2>/dev/null || true
+      - docker run -d --name {{.CONTAINER_NAME}} --network taskops-net -p 2181:2181 -e ZOO_4LW_COMMANDS_WHITELIST=* {{.IMAGE}}
+    silent: true
+
+  wait:
+    desc: Wait for Zookeeper to be ready (up to 30s)
+    cmds:
+      - |
+        for i in $(seq 1 15); do
+          if echo ruok | docker exec -i {{.CONTAINER_NAME}} nc localhost 2181 2>/dev/null | grep -q imok; then
+            echo "Zookeeper is ready"
+            exit 0
+          fi
+          echo "Waiting for Zookeeper... (attempt $i/15)"
+          sleep 2
+        done
+        echo "Zookeeper failed to start"
+        exit 1
+    silent: true
+
+  stop:
+    desc: Stop the Zookeeper container
+    cmds:
+      - docker stop {{.CONTAINER_NAME}}
+    silent: true
+
+  remove:
+    desc: Remove the Zookeeper container
+    cmds:
+      - docker rm -f {{.CONTAINER_NAME}}
+    silent: true
+
+  logs:
+    desc: View the logs of the Zookeeper container
+    cmds:
+      - docker logs {{.CONTAINER_NAME}}
+    silent: false
+
+  cli:
+    desc: Open a shell in the Zookeeper container
+    cmds:
+      - docker exec -it {{.CONTAINER_NAME}} bash
+    silent: false
+
+  status:
+    desc: Check the status of the Zookeeper container
+    cmds:
+      - docker ps -a --filter "name={{.CONTAINER_NAME}}"
+    silent: true
+
+  test:
+    desc: Run a test command in the Zookeeper container
+    cmds:
+      - task: create
+      - task: wait
+      - task: status
+      - task: logs
+      - task: remove
+      - task: status
+    silent: false
